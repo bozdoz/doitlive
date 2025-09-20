@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"flag"
 
 	"fmt"
 	"net/http"
@@ -19,9 +20,19 @@ var (
 		".git":         {},
 		"node_modules": {},
 	}
+	is_debug = flag.Bool("debug", false, "set debug")
 )
 
+func debug(a ...any) {
+	a = append([]any{"[doitlive]"}, a...)
+	if *is_debug {
+		fmt.Println(a...)
+	}
+}
+
 func main() {
+	flag.Parse()
+
 	// WebSocket endpoint (see ./wshandler.go)
 	http.HandleFunc(wsEndpoint, handleWebSocketConnect)
 

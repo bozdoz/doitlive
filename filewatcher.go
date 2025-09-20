@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"time"
 
 	"fmt"
 	"io/fs"
@@ -27,8 +28,17 @@ func watchFiles() {
 			if err := watcher.Add(path); err != nil {
 				fmt.Printf("%v", err)
 			}
+			debug("added", path)
 		}
 		return nil
+	})
+
+	var name string
+
+	// dedupe
+	t := time.AfterFunc(24*time.Hour, func() {
+		fmt.Println("[doitlive] Change:", name)
+		broadcast <- "reload"
 	})
 
 	for {
@@ -37,9 +47,11 @@ func watchFiles() {
 			if !ok {
 				return
 			}
-			if event.Op&fsnotify.Write == fsnotify.Write {
-				fmt.Println("[doitlive] Change:", event.Name)
-				broadcast <- "reload"
+			debug(event)
+			if event.Has(fsnotify.Write) {
+				// dedupe
+				name = event.Name
+				t.Reset(200 * time.Millisecond)
 			}
 		case err, ok := <-watcher.Errors:
 			if !ok {

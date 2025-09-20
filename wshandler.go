@@ -40,6 +40,7 @@ func handleWebSocketConnect(w http.ResponseWriter, r *http.Request) {
 			mu.Lock()
 			delete(clients, ws)
 			mu.Unlock()
+			fmt.Println("[doitlive]", "Client Disconnected")
 			break
 		}
 	}
