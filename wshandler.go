@@ -28,7 +28,7 @@ func handleWebSocketConnect(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 
-	fmt.Println("[doitlive]", "Client Connected")
+	debug("Client Connected")
 
 	mu.Lock()
 	clients[ws] = struct{}{}
@@ -40,7 +40,7 @@ func handleWebSocketConnect(w http.ResponseWriter, r *http.Request) {
 			mu.Lock()
 			delete(clients, ws)
 			mu.Unlock()
-			fmt.Println("[doitlive]", "Client Disconnected")
+			debug("Client Disconnected")
 			break
 		}
 	}

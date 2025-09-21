@@ -1,3 +1,7 @@
+### 1.0.2
+
+- added flag for hard-refresh; changed to false by default
+
 ### 1.0.1
 
 - added debug flag

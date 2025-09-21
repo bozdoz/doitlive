@@ -76,4 +76,42 @@ if DEBUG:
 - `.git` and `node_modules` should be ignored
 - it will only be run on `localhost`
 - consumer can inject script (such as Django middleware)
-- consumer is happy with hard reload (no caching)
+- ~~consumer is happy with hard reload (no caching)~~
+
+<details>
+<summary>Using soft reload in Django</summary>
+
+In context_processors.py:
+
+```python
+
+def static_key (_request) :
+	if settings.DEBUG:
+		import random
+		import string
+
+		def random_string(length=5):
+				letters = string.ascii_letters
+				return ''.join(random.choice(letters) for _ in range(length))
+
+		return {
+			'static_key': random_string()
+		}
+	else:
+		return {
+			# TODO: needs to pull version
+			'static_key': 'v1'
+		}
+```
+
+Then in the template:
+
+```html
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'css/style.css' %}?{{ static_key }}"
+/>
+```
+
+</details>

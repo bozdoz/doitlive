@@ -12,7 +12,7 @@ var jsTemplate = template.Must(template.New("").Parse(
         if (event.data === "reload") {
             console.log('[doitlive]', 'Reloading page');
             // true = hard refresh
-            window.location.reload(true);
+            window.location.reload({{.HardRefresh}});
         }
     };
 })();`))
@@ -22,7 +22,8 @@ func handleJS(w http.ResponseWriter, r *http.Request) {
 
 	// create a websocket that points to the connect endpoint
 	jsTemplate.Execute(w, map[string]string{
-		"Host": wsHost,
-		"Path": wsEndpoint,
+		"Host":        wsHost,
+		"Path":        wsEndpoint,
+		"HardRefresh": HardRefresh,
 	})
 }
