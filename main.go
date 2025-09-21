@@ -12,18 +12,25 @@ import (
 var version string
 
 var (
-	wsPort      = "35729"
-	wsHost      = fmt.Sprintf("localhost:%s", wsPort)
+	is_hard_refresh = flag.Bool("hard-refresh", false, "JS code executes a hard refresh")
+	is_debug        = flag.Bool("debug", false, "set debug")
+	proxy_port      = flag.Int("proxy", 4000, "proxy port")
+	host_port       = flag.Int("host", 8000, "host port")
+)
+
+var (
+	HardRefresh = false
 	wsEndpoint  = "/ws/reload"
 	broadcast   = make(chan string)
-	HardRefresh = "false"
 	ignored     = map[string]struct{}{
 		".git":         {},
 		"node_modules": {},
 	}
-	is_hard_refresh = flag.Bool("hard-refresh", false, "JS code executes a hard refresh")
-	is_debug        = flag.Bool("debug", false, "set debug")
 )
+
+func init() {
+	flag.Parse()
+}
 
 func debug(a ...any) {
 	a = append([]any{"[doitlive]"}, a...)
@@ -33,22 +40,19 @@ func debug(a ...any) {
 }
 
 func main() {
-	flag.Parse()
-
-	if *is_hard_refresh {
-		HardRefresh = "true"
-	}
+	http.Handle("/", runProxy())
 
 	// WebSocket endpoint (see ./wshandler.go)
 	http.HandleFunc(wsEndpoint, handleWebSocketConnect)
-
-	// Serve the client JS (see ./jshandler.go)
-	http.HandleFunc("/doitlive.js", handleJS)
 
 	// Start broadcaster
 	go waitForChanges()
 	// start file watcher (see ./filewatcher.go)
 	go watchFiles()
+
+	fmt.Println("[doitlive]", version)
+	fmt.Println("[doitlive]", "Host:", fmt.Sprintf("http://localhost:%d", *host_port))
+	fmt.Println("[doitlive]", "Proxied:", fmt.Sprintf("http://localhost:%d", *proxy_port))
 
 	// start server
 	startServer()

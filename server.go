@@ -11,11 +11,7 @@ import (
 )
 
 func startServer() {
-	fmt.Println("[doitlive]", version)
-	fmt.Println("[doitlive]", "JS url:", fmt.Sprintf("http://%s/doitlive.js", wsHost))
-	fmt.Println("[doitlive]", "WS Endpoint:", fmt.Sprintf("http://%s%s", wsHost, wsEndpoint))
-
-	server := &http.Server{Addr: fmt.Sprintf(":%s", wsPort)}
+	server := &http.Server{Addr: fmt.Sprintf(":%d", *proxy_port)}
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)

@@ -1,6 +1,6 @@
 # doitlive
 
-Window reloader in Go, with websockets and filewatchers: watches changed files and signals (via websockets) that a web app should reload (without cache)
+Window reloader in Go, with websockets and filewatchers: watches changed files and signals (via websockets) that a web app should reload
 
 ## Usage
 
@@ -10,72 +10,24 @@ Window reloader in Go, with websockets and filewatchers: watches changed files a
 go build -o doitlive .
 ```
 
-2. Move it to a directory where you're building a web app
+2. Move it to the root directory where you're building a web app (and want to watch files)
 
-3. Insert this script into your web app, somehow:
-
-```html
-<script src="http://localhost:35729/doitlive.js"></script>
-```
-
-<details>
-<summary>Example Django middleware</summary>
-
-some middleware.py:
-
-```python
-class DoItLiveMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        response = self.get_response(request)
-
-        # Only inject into HTML pages (not JSON, CSS, etc.)
-        content_type = response.get("Content-Type", "")
-        if "text/html" in content_type and hasattr(response, "content"):
-            snippet = """
-            <script src="http://localhost:35729/doitlive.js"></script>
-            """
-
-            # Insert before closing </body>, fallback append at end
-            content = response.content.decode("utf-8")
-            if "</body>" in content:
-                content = content.replace("</body>", snippet + "</body>")
-            else:
-                content += snippet
-
-            response.content = content.encode("utf-8")
-            response["Content-Length"] = len(response.content)
-
-        return response
-```
-
-in settings.py:
-
-```python
-if DEBUG:
-    MIDDLEWARE += ["config.middleware.DoItLiveMiddleware"]
-```
-
-</details>
-
-4. Run it (in the background) alongside your app:
+3. Run it (in the background) alongside your app (change `--host` or `--proxy` if you want with `--host=8080 --port=80`):
 
 ```sh
 ./doitlive
-[doitlive] v1.0.0
-[doitlive] JS url: http://localhost:35729/doitlive.js
-[doitlive] WS Endpoint: http://localhost:35729/ws/reload
+[doitlive] v2.0.0
+[doitlive] Host: http://localhost:8000
+[doitlive] Proxied: http://localhost:4000
 ```
 
-5. Run your app (somehow), then change files to see the page reload
+5. Run your app (somehow), visit the proxy URL, then change files to see the page reload
 
 ## Assumptions
 
 - `.git` and `node_modules` should be ignored
 - it will only be run on `localhost`
-- consumer can inject script (such as Django middleware)
+- ~~consumer can inject script (such as Django middleware)~~
 - ~~consumer is happy with hard reload (no caching)~~
 
 <details>
